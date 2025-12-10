@@ -8,6 +8,11 @@ django.jQuery(function () {
         for (var i = 0; i < fields.length; i++) {
             var $f = django.jQuery(fields[i]);
             var id = $f.attr("id") + "_jsoneditor";
+
+            if (id.includes("__prefix__")) {
+                continue;
+            }
+            
             var name = $f.attr("name") + "_jsoneditor";
             var $nxt = $f.parent().find('#' + id);
             if ($nxt.attr("name") == name) {
