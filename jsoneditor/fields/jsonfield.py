@@ -8,24 +8,7 @@ class JSONFormField(_JSONFormField):
     widget = JSONEditor
 
     def __init__(self, *av, **kw):
-        # Extract collapsed parameter if provided and pass it to widget
-        collapsed = kw.pop("collapsed", False)
-        # Get widget from kwargs or use class default
-        widget = kw.get("widget", self.widget)
-        # If widget is the class (not an instance), instantiate it with collapsed option
-        if widget == self.widget or (
-            isinstance(widget, type) and issubclass(widget, self.widget)
-        ):
-            # Create widget instance with collapsed parameter
-            widget = self.widget(collapsed=collapsed)
-        elif isinstance(widget, self.widget):
-            # Update existing widget instance
-            widget.collapsed = collapsed
-            # Also update init_options to ensure it's passed to JavaScript
-            if widget.init_options is None:
-                widget.init_options = {}
-            widget.init_options["collapsed"] = collapsed
-        kw["widget"] = widget
+        kw["widget"] = self.widget  # force avoiding widget override
         super(JSONFormField, self).__init__(*av, **kw)
 
 

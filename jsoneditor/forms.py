@@ -53,14 +53,6 @@ class JSONEditor(Textarea):
         self.init_options = kwargs.pop("init_options", None)
         self.ace_options = kwargs.pop("ace_options", None)
         self.encoder = kwargs.pop("encoder", None)
-        self.collapsed = kwargs.pop("collapsed", False)
-
-        # Merge collapsed into init_options if provided
-        if self.collapsed:
-            if self.init_options is None:
-                self.init_options = {}
-            self.init_options["collapsed"] = self.collapsed
-
         super().__init__(*args, **kwargs)
 
     def render(self, name, value, attrs=None, renderer=None):
