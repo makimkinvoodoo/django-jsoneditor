@@ -28,8 +28,13 @@ django.jQuery(function () {
             }
             $f.parent().append($nxt);
             var fnc = function (f, nxt, value) {
-                var initOptions = Object.assign({}, initOverrides ? initOverrides : django_jsoneditor_init);
+                var initOptions = Object.assign({}, (initOverrides && typeof initOverrides === 'object') ? initOverrides : django_jsoneditor_init);
                 initOptions['schema'] = jsonschema;
+                
+                // Extract collapsed option before passing to JSONEditor
+                var shouldCollapse = initOptions['collapsed'] === true;
+                // Remove collapsed from initOptions as it's not a standard JSONEditor option
+                delete initOptions['collapsed'];
 
                 var editor = new jsoneditor.JSONEditor(nxt, Object.assign({
                     onChange: function () {
@@ -49,6 +54,10 @@ django.jQuery(function () {
                 // Load the editor.
                 try {
                     editor.set(JSON.parse(value));
+                    // Collapse all fields if collapsed option is set
+                    if (shouldCollapse && editor.mode === 'tree' && typeof editor.collapseAll === 'function') {
+                        editor.collapseAll();
+                    }
                 } catch (e) {
                     // Force editor mode to "code" if there are JSON parse errors.
                     editor.setMode('code');
