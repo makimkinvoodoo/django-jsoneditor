@@ -38,8 +38,9 @@ django.jQuery(function () {
                 
                 // Extract collapsed option before passing to JSONEditor
                 var shouldCollapse = initOptions['collapsed'] === true;
-                // Remove collapsed from initOptions as it's not a standard JSONEditor option
+                // Remove collapsed and _original_mode from initOptions as they're not standard JSONEditor options
                 delete initOptions['collapsed'];
+                delete initOptions['_original_mode'];
 
                 var editor = new jsoneditor.JSONEditor(nxt, Object.assign({
                     onChange: function () {
@@ -49,6 +50,9 @@ django.jQuery(function () {
                     onModeChange: function(endMode, startMode) {
                         if (endMode == 'code') {
                             editor.aceEditor.setOptions(aceOverrides ? aceOverrides : django_jsoneditor_ace_options);
+                        } else if (endMode == 'tree' && shouldCollapse && typeof editor.collapseAll === 'function') {
+                            // Collapse when switching to tree mode if collapsed option is set
+                            editor.collapseAll();
                         }
                     },
                     onEditable: function() {
@@ -59,7 +63,7 @@ django.jQuery(function () {
                 // Load the editor.
                 try {
                     editor.set(JSON.parse(value));
-                    // Collapse all fields if collapsed option is set
+                    // Collapse all fields if collapsed option is set and editor is in tree mode
                     if (shouldCollapse && editor.mode === 'tree' && typeof editor.collapseAll === 'function') {
                         editor.collapseAll();
                     }
@@ -75,8 +79,22 @@ django.jQuery(function () {
                 if (editor.mode == 'code') {
                     editor.aceEditor.setOptions(django_jsoneditor_ace_options);
 
-                    // Format the code on first load
-                    editor.format();
+                    // If collapsed is true, minify the JSON (don't format it)
+                    // Otherwise, format it nicely
+                    if (shouldCollapse) {
+                        // Minify the JSON by getting the text and setting it back as minified
+                        var currentText = editor.getText();
+                        try {
+                            var parsed = JSON.parse(currentText);
+                            var minified = JSON.stringify(parsed);
+                            editor.setText(minified);
+                        } catch (e) {
+                            // If minification fails, just keep the current text
+                        }
+                    } else {
+                        // Format the code on first load
+                        editor.format();
+                    }
                 }
 
                 return editor;

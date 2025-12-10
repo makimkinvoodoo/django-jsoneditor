@@ -57,16 +57,30 @@ class JSONEditor(Textarea):
 
         # Merge collapsed into init_options if provided
         if self.collapsed:
+            # Ensure init_options is a dict
             if self.init_options is None:
                 self.init_options = {}
+            elif not isinstance(self.init_options, dict):
+                # If init_options is not a dict, convert it
+                self.init_options = (
+                    dict(self.init_options)
+                    if hasattr(self.init_options, "__iter__")
+                    else {}
+                )
             self.init_options["collapsed"] = self.collapsed
 
         super().__init__(*args, **kwargs)
 
     def render(self, name, value, attrs=None, renderer=None):
-        attrs["jsonschema"] = json.dumps(self.jsonschema)
-        attrs["init_options"] = json.dumps(self.init_options)
-        attrs["ace_options"] = json.dumps(self.ace_options)
+        attrs["jsonschema"] = (
+            json.dumps(self.jsonschema) if self.jsonschema is not None else "null"
+        )
+        attrs["init_options"] = (
+            json.dumps(self.init_options) if self.init_options is not None else "null"
+        )
+        attrs["ace_options"] = (
+            json.dumps(self.ace_options) if self.ace_options is not None else "null"
+        )
 
         if not isinstance(value, basestring):
             value = json.dumps(value, cls=self.encoder)
