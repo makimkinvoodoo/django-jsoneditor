@@ -70,6 +70,8 @@ django.jQuery(function () {
                     editor.format();
                 }
 
+                editor.collapseAll();
+
                 return editor;
             };
             jsonEditors[id] = fnc($f[0], $nxt[0], value);
